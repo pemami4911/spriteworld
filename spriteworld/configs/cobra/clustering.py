@@ -94,11 +94,11 @@ def get_config(mode='train'):
   sprite_gen = sprite_generators.shuffle(sprite_gen)
 
   # Clustering task will define rewards
-  task = tasks.Clustering(c0_clusters, terminate_bonus=0., reward_range=10.)
+  task = tasks.Clustering(c0_clusters, terminate_bonus=0., reward_range=10., sparse_reward=True)
 
   config = {
       'task': task,
-      'action_space': common.action_space(),
+      'action_space': common.noisy_action_space(),
       'renderers': common.renderers(),
       'init_sprites': sprite_gen,
       'max_episode_length': MAX_EPISODE_LENGTH,

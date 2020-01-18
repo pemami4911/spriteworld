@@ -91,6 +91,7 @@ class Environment(dm_env.Environment):
       return self.reset()
 
     self._step_count += 1
+    
     reward = self._action_space.step(
         action, self._sprites, keep_in_frame=self._keep_in_frame)
 

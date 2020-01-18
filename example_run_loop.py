@@ -36,9 +36,9 @@ from spriteworld import environment
 from spriteworld import renderers
 
 FLAGS = flags.FLAGS
-flags.DEFINE_integer('num_episodes', 100, 'Number of training episodes.')
+flags.DEFINE_integer('num_episodes', 30, 'Number of training episodes.')
 flags.DEFINE_string('config',
-                    'spriteworld.configs.cobra.goal_finding_new_position',
+                    'spriteworld.configs.mon.goal_finding_planning',
                     'Module name of task config to use.')
 flags.DEFINE_string('mode', 'train', 'Task mode, "train" or "test"]')
 
@@ -55,30 +55,36 @@ class RandomAgent(object):
     observation = timestep.observation
     del observation
     del timestep
+    
+    pos = self._env.sample_contained_position()
     action = self._env.action_space.sample()
+    action[:2] = pos
     return action
 
 
 def main(argv):
   del argv
-
   config = importlib.import_module(FLAGS.config)
   config = config.get_config(FLAGS.mode)
   config['renderers']['success'] = renderers.Success()  # Used for logging
   env = environment.Environment(**config)
   agent = RandomAgent(env)
 
+  episode_frames = np.zeros((20,64,64,3))
   # Loop over episodes, logging success and mean reward per episode
   for episode in range(FLAGS.num_episodes):
     timestep = env.reset()
+    t = 0
     rewards = []
     while not timestep.last():
+      episode_frames[t] = timestep.observation['image']
       action = agent.step(timestep)
       timestep = env.step(action)
       rewards.append(timestep.reward)
+      t += 1
     logging.info('Episode %d: Success = %r, Reward = %s.', episode,
-                 timestep.observation['success'], np.nanmean(rewards))
-
+                 timestep.observation['success'], np.nanmax(rewards))
+  np.save('random_actions', episode_frames)
 
 if __name__ == '__main__':
   app.run(main)

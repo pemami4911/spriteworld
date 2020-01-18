@@ -151,8 +151,11 @@ class FindGoalPosition(AbstractTask):
       reward += dense_reward
     elif not self._sparse_reward:
       reward += dense_reward
-
-    return reward
+        
+    if self._sparse_reward:
+        return float(reward > 0)
+    else:
+        return reward
 
   def success(self, sprites):
     return all(np.array(self._filtered_sprites_rewards(sprites)) >= 0)
@@ -244,6 +247,52 @@ class Clustering(AbstractTask):
     metric = self._compute_clustering_metric(sprites)
     return metric >= self._termination_threshold
 
+
+class CollisionClustering(Clustering):
+  """
+  Penalizes for sprites colliding with obstacles
+  """
+  def __init__(self,
+               cluster_distribs,
+               obstacle_distrib,
+               obstacle_distance=0.05,
+               collision_penalty=5,
+               termination_threshold=2.5,
+               terminate_bonus=0.0,
+               sparse_reward=False,
+               reward_range=10):
+    super(CollisionClustering, self).__init__(cluster_distribs, \
+            termination_threshold, terminate_bonus, sparse_reward, reward_range)
+    self.obstacle_distrib = obstacle_distrib
+    self.obstacle_distance = obstacle_distance
+    self.collision_penalty = collision_penalty
+
+
+  def get_collision_penalty(self, sprites):
+    """
+    For each sprite not in the obstacle_distrib, check if they are
+    touching the sprite in the obstacle_distrib
+    """
+    penalty = 0
+    obstacles = []
+    others = []
+    for s in sprites:
+      if self.obstacle_distrib.contains(s.factors):
+        obstacles += [s]
+      else:
+        others += [s]
+    for s in others:
+      for o in obstacles:
+        distance = np.sum((s.position - o.position)**2.)**0.5
+        if distance < self.obstacle_distance:
+          penalty += self.collision_penalty
+    return -penalty
+
+  def reward(self, sprites):
+    reward = super(CollisionClustering, self).reward(sprites)
+    reward += self.get_collision_penalty(sprites)
+    return reward
+      
 
 class MetaAggregated(AbstractTask):
   """Combines several tasks together."""

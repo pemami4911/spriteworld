@@ -46,7 +46,8 @@ class SelectMove(object):
   There is an optional control cost proportional to the norm of the motion.
   """
 
-  def __init__(self, scale=1.0, motion_cost=0.0, noise_scale=None):
+  def __init__(self, scale=1.0, motion_cost=0.0, noise_scale=None,
+          proportional_motion_noise=None, filter_distribs=None):
     """Constructor.
 
     Args:
@@ -55,10 +56,18 @@ class SelectMove(object):
       motion_cost: Factor by which motion incurs cost.
       noise_scale: Optional stddev of the noise. If scalar, applied to all
         action space components. If vector, must have same shape as action.
+      proportional_motion_noise: Optionallly increase the base amount of motion noise
+        proportionally to the magnitude of the motion by provided factor
+      filter_distribs: None or list of factor_distributions.AbstractDistribution. If None,
+        all sprites can be acted upon. If not None, only sprites with factors contained
+        in these distributions can be acted upon.
+
     """
     self._scale = scale
     self._motion_cost = motion_cost
     self._noise_scale = noise_scale
+    self._proportional_motion_noise = proportional_motion_noise
+    self._filter_distribs = filter_distribs
     self._action_spec = specs.BoundedArray(
         shape=(4,), dtype=np.float32, minimum=0.0, maximum=1.0)
 
@@ -67,7 +76,14 @@ class SelectMove(object):
     return delta_pos
 
   def apply_noise_to_action(self, action):
-    if self._noise_scale:
+    if self._noise_scale is not None:
+      if isinstance(self._noise_scale, np.ndarray):
+        scale = self._noise_scale.copy()
+      else:
+        scale = self._noise_scale
+      if self._proportional_motion_noise:
+        scale *= (1. + self._proportional_motion_noise \
+                    * np.linalg.norm(self.get_motion(action)))
       noise = np.random.normal(
           loc=0.0, scale=self._noise_scale, size=action.shape)
       return action + noise
@@ -77,7 +93,12 @@ class SelectMove(object):
   def get_sprite_from_position(self, position, sprites):
     for sprite in sprites[::-1]:
       if sprite.contains_point(position):
-        return sprite
+        if self._filter_distribs is not None:
+            for filter_distrib in self._filter_distribs:
+                if filter_distrib.contains(sprite.factors):
+                  return sprite
+        else:
+          return sprite
     return None
 
   def step(self, action, sprites, keep_in_frame):

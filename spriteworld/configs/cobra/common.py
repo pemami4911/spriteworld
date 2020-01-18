@@ -26,6 +26,9 @@ from spriteworld import renderers as spriteworld_renderers
 def action_space():
   return action_spaces.SelectMove(scale=0.25)
 
+def noisy_action_space(_noise_std, _prop_motion_noise, filter_distribs):
+  return action_spaces.SelectMove(scale=0.25, noise_scale=_noise_std,
+          proportional_motion_noise=_prop_motion_noise, filter_distribs=filter_distribs)
 
 def renderers():
   return {

@@ -299,7 +299,8 @@ def setup_run_ui(env_config, render_size, task_hsv_colors, anti_aliasing):
   """Start a Demo UI given an env_config."""
   if isinstance(env_config['action_space'], action_spaces.SelectMove):
     # DragAndDrop is a bit easier to demo than the SelectMove action space
-    env_config['action_space'] = action_spaces.DragAndDrop(scale=0.5)
+    #env_config['action_space'] = action_spaces.DragAndDrop(scale=0.5, noise_scale=np.array([0,0,0.025,0.025]), proportional_motion_noise=0.35)
+    env_config['action_space'] = action_spaces.DragAndDrop(scale=0.5, noise_scale=0.02, proportional_motion_noise=0.35, filter_distribs=env_config['metadata']['filter_distribs'])
     agent = HumanDragAndDropAgent(env_config['action_space'])
   elif isinstance(env_config['action_space'], action_spaces.Embodied):
     agent = HumanEmbodiedAgent(env_config['action_space'])

@@ -35,7 +35,7 @@ from absl import flags
 from spriteworld import demo_ui
 
 FLAGS = flags.FLAGS
-flags.DEFINE_string('config', 'spriteworld.configs.cobra.clustering',
+flags.DEFINE_string('config', 'spriteworld.configs.mon.noisy_clustering',
                     'Module name of task config to use.')
 flags.DEFINE_string('mode', 'train', 'Task mode, "train" or "test"]')
 flags.DEFINE_boolean('task_hsv_colors', True,
