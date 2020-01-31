@@ -12,13 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-# python2 python3
-"""Goal-Finding tasks testing for generalization to new shapes.
-
-In this task there is one sprite per episode. That sprite must be brought to the
-goal location, which is always the center of the arena. At training time the
-sprite is a square. At test time it is either a circle or a triangle.
-"""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -34,11 +27,13 @@ import numpy as np
 TERMINATE_DISTANCE = 0.075
 NUM_TARGETS = 2
 MODES_SHAPES = {
-    'train': distribs.Discrete('shape', ['square', 'circle']),
+    'train': distribs.Discrete('shape', ['square', 'circle', 'triangle'], probs=[0.6, 0.15, 0.25]),
     'test': distribs.Discrete('shape', ['triangle', 'circle']),
 }
 MOTION_STD_DEV = np.array([0,0,0.025, 0.025])
 PROPORTIONAL_MOTION_NOISE = 0.35
+#MOTION_STD_DEV = 0.
+#PROPORTIONAL_MOTION_NOISE = None
 
 
 def get_config(mode='train'):
@@ -55,10 +50,10 @@ def get_config(mode='train'):
   factors = distribs.Product([
       MODES_SHAPES[mode],
       distribs.Continuous('x', 0.1, 0.9),
-      distribs.Continuous('y', 0.1, 0.9),
-      distribs.Discrete('scale', [0.13]),
-      distribs.Continuous('c0', 0., 0.4),
-      distribs.Continuous('c1', 0.3, 1.),
+      distribs.Continuous('y', 0.2, 0.5),
+      distribs.Discrete('scale', [0.13, 0.18], probs=[0.7,0.3]),
+      distribs.Discrete('c0', [0.9, 0.55, 0.27], probs=[0.6,0.3,0.1]),
+      distribs.Discrete('c1', [0.6]),
       distribs.Continuous('c2', 0.9, 1.),
   ])
   sprite_gen = sprite_generators.generate_sprites(
@@ -66,14 +61,15 @@ def get_config(mode='train'):
   # Randomize sprite ordering to eliminate any task information from occlusions
   sprite_gen = sprite_generators.shuffle(sprite_gen)
 
-  task = tasks.FindGoalPosition(terminate_distance=TERMINATE_DISTANCE, sparse_reward=True)
+  #task = tasks.FindGoalPosition(terminate_distance=TERMINATE_DISTANCE, sparse_reward=True)
+  task = tasks.NoReward()
 
   config = {
       'task': task,
       'action_space': common.noisy_action_space(MOTION_STD_DEV, PROPORTIONAL_MOTION_NOISE, None),
       'renderers': common.renderers(),
       'init_sprites': sprite_gen,
-      'max_episode_length': 20,
+      'max_episode_length': 3,
       'metadata': {
           'name': os.path.basename(__file__),
           'mode': mode
