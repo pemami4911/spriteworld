@@ -125,6 +125,13 @@ class Sprite(object):
     raise ValueError('max_tries exceeded. There is almost surely an error in '
                      'the SpriteWorld library code.')
 
+  def is_occluded_by(self, other_sprite):
+    from shapely.geometry import Polygon
+    other_vertices = other_sprite.vertices
+    p1 = Polygon(other_vertices)
+    p2 = Polygon(self.vertices)
+    return p1.intersects(p2)
+
   @property
   def vertices(self):
     """Numpy array of vertices of the shape."""
@@ -174,6 +181,7 @@ class Sprite(object):
     self._centered_path = rescale.transform_path(self._centered_path)
     self._scale = s
 
+
   @property
   def c0(self):
     return self._color[0]
@@ -197,6 +205,10 @@ class Sprite(object):
   @property
   def color(self):
     return self._color
+  
+  @color.setter
+  def color(self, c):
+    self._color = c
 
   @property
   def position(self):

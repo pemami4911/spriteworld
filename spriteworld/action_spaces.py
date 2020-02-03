@@ -84,6 +84,8 @@ class SelectMove(object):
       if self._proportional_motion_noise:
         scale *= (1. + self._proportional_motion_noise \
                     * np.linalg.norm(self.get_motion(action)))
+      if action[2] > 0.5:
+          scale *= 2
       noise = np.random.normal(
           loc=0.0, scale=self._noise_scale, size=action.shape)
       return action + noise

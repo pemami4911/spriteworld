@@ -126,6 +126,28 @@ class Environment(dm_env.Environment):
     sprite = self._sprites[np.random.randint(len(self._sprites))]
     return sprite.sample_contained_position()
 
+  def get_sprite_positions(self):
+      positions = []
+      for s in self._sprites:
+          positions += [np.array([s.x, s.y])]
+      return np.stack(positions)
+
+  def pick_attempt(self, point):
+      for s in self._sprites:
+          if s.contains_point(point):
+              return True
+      return False
+
+  def any_occluded(self):
+    for s1 in self._sprites:
+        for s2 in self._sprites:
+            if (s1.position == s2.position).all():
+                continue
+            if s1.is_occluded_by(s2):
+                return True
+    return False
+
+          
   def state(self):
     global_state = {
         'success': self.success(),
