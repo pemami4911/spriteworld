@@ -70,11 +70,13 @@ class Environment(dm_env.Environment):
     self._reset_next_step = True
     self._renderers_initialized = False
     self._metadata = metadata
+    self._bg_color = 0
 
   def reset(self):
     self._sprites = self._init_sprites()
     self._step_count = 0
     self._reset_next_step = False
+    self._bg_color = np.random.randint(200)
     return dm_env.restart(self.observation())
 
   def success(self):
@@ -151,6 +153,7 @@ class Environment(dm_env.Environment):
   def state(self):
     global_state = {
         'success': self.success(),
+        'bg_color': self._bg_color
     }
     if self._metadata:
       global_state['metadata'] = self._metadata

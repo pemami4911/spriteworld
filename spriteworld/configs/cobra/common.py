@@ -37,5 +37,6 @@ def renderers():
               image_size=(64, 64),
               anti_aliasing=5,
               color_to_rgb=spriteworld_renderers.color_maps.hsv_to_rgb,
+              bg_color='grayscale'
           )
   }

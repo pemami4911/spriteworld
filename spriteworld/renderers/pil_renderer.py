@@ -49,13 +49,17 @@ class PILRenderer(abstract_renderer.AbstractRenderer):
     self._anti_aliasing = anti_aliasing
     self._canvas_size = (anti_aliasing * image_size[0],
                          anti_aliasing * image_size[1])
-
+    
     if color_to_rgb is None:
       color_to_rgb = lambda x: x
     self._color_to_rgb = color_to_rgb
 
+    self._grayscale = False
     if bg_color is None:
       bg_color = (0, 0, 0)
+    elif bg_color == 'grayscale':
+      self._grayscale = True
+      bg_color = (0,0,0)
     self._canvas_bg = Image.new('RGB', self._canvas_size, bg_color)
 
     self._observation_spec = specs.Array(
@@ -76,7 +80,11 @@ class PILRenderer(abstract_renderer.AbstractRenderer):
     Returns:
       Numpy uint8 RGB array of size self._image_size + (3,).
     """
-    self._canvas.paste(self._canvas_bg)
+    if self._grayscale:
+        #bg_color = np.random.randint(55)
+        self._canvas.paste(Image.new('RGB', self._canvas_size, (global_state['bg_color'], global_state['bg_color'], global_state['bg_color'])))
+    else:
+        self._canvas.paste(self._canvas_bg)
     for obj in sprites:
       vertices = self._canvas_size * obj.vertices
       color = self._color_to_rgb(obj.color)

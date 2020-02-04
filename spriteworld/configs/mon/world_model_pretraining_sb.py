@@ -25,13 +25,13 @@ from spriteworld.configs.cobra import common
 import numpy as np
 
 TERMINATE_DISTANCE = 0.075
-def NUM_TARGETS(): return np.random.choice([1,2,3])
+def NUM_TARGETS(): return np.random.choice([2,3])
 MODES_SHAPES = {
-    'train': distribs.Discrete('shape', ['square', 'circle', 'triangle'], probs=[0.6, 0.2, 0.2]),
+    'train': distribs.Discrete('shape', ['square', 'circle', 'triangle'], probs=[0.55, 0.25, 0.2]),
     'test': distribs.Discrete('shape', ['triangle', 'circle']),
 }
 MOTION_STD_DEV = np.array([0,0,0.07, 0.07])
-PROPORTIONAL_MOTION_NOISE = 0.75
+PROPORTIONAL_MOTION_NOISE = 0.0
 #MOTION_STD_DEV = 0.
 #PROPORTIONAL_MOTION_NOISE = None
 
@@ -49,10 +49,10 @@ def get_config(mode='train'):
 
   factors = distribs.Product([
       MODES_SHAPES[mode],
-      distribs.Continuous('x', 0.1, 0.9),
-      distribs.Continuous('y', 0.1, 0.9),
-      distribs.Discrete('scale', [0.13]),
-      distribs.Discrete('c0', [0.9, 0.55, 0.27], probs=[0.65,0.15,0.2]),
+      distribs.Continuous('x', 0.1, 0.7),
+      distribs.Continuous('y', 0.1, 0.7),
+      distribs.Discrete('scale', [0.20]),
+      distribs.Discrete('c0', [0.9, 0.55, 0.27], probs=[0.4,0.25,0.35]),
       distribs.Discrete('c1', [0.6]),
       distribs.Continuous('c2', 0.9, 1.),
   ])
