@@ -144,9 +144,9 @@ class FindGoalPosition(AbstractTask):
     rewards = self._filtered_sprites_rewards(sprites)
     if not rewards:  # No sprites get through the filter, so make reward NaN
       return np.nan
-    dense_reward = np.sum(rewards)
+    dense_reward = np.sum(np.max(rewards,0)) # for sparse reward, only require 1 sprite to reach goal
 
-    if all(np.array(rewards) >= 0):  # task succeeded
+    if any(np.array(rewards) >= 0):  # task succeeded
       reward += self._terminate_bonus
       reward += dense_reward
     elif not self._sparse_reward:
@@ -158,7 +158,7 @@ class FindGoalPosition(AbstractTask):
         return reward
 
   def success(self, sprites):
-    return all(np.array(self._filtered_sprites_rewards(sprites)) >= 0)
+    return any(np.array(self._filtered_sprites_rewards(sprites)) >= 0)
 
 
 class Clustering(AbstractTask):

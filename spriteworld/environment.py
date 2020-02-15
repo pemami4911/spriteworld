@@ -29,6 +29,9 @@ class Environment(dm_env.Environment):
 
   This environment uses the `dm_env` interface. For details, see
   https://github.com/deepmind/dm_env
+
+  Modifications by @pemami4911
+    - uses a random grayscale background
   """
 
   def __init__(self,
@@ -65,7 +68,7 @@ class Environment(dm_env.Environment):
     self._init_sprites = init_sprites
     self._keep_in_frame = keep_in_frame
     self._max_episode_length = max_episode_length
-    self._sprites = self._init_sprites()
+    self._sprites = self._init_sprites(fix_colors=distinct_colors)
     self._step_count = 0
     self._reset_next_step = True
     self._renderers_initialized = False

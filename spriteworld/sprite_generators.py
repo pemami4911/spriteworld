@@ -24,7 +24,7 @@ import numpy as np
 from spriteworld import sprite
 
 
-def generate_sprites(factor_dist, num_sprites=1):
+def generate_sprites(factor_dist, num_sprites=1, fix_colors=False):
   """Create callable that samples sprites from a factor distribution.
 
   Args:
@@ -40,10 +40,11 @@ def generate_sprites(factor_dist, num_sprites=1):
   def _generate():
     n = num_sprites() if callable(num_sprites) else num_sprites
     sprites = [sprite.Sprite(**factor_dist.sample()) for _ in range(n)]
-    #colors = [[0.9,0.6,0.95], [0.55,0.6,0.95], [0.27,0.6,0.95]]
-    #np.random.shuffle(colors)
-    #for idx,s in enumerate(sprites):
-    #    s.color = colors[idx]
+    if fix_colors:
+        colors = [[0.9,0.6,0.95], [0.55,0.6,0.95], [0.27,0.6,0.95]]
+        np.random.shuffle(colors)
+        for idx,s in enumerate(sprites):
+            s.color = colors[idx]
     return sprites
 
   return _generate

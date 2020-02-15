@@ -103,7 +103,7 @@ class SelectMove(object):
           return sprite
     return None
 
-  def step(self, action, sprites, keep_in_frame):
+  def step(self, action, sprites, keep_in_frame=True):
     """Take an action and move the sprites.
 
     Args:

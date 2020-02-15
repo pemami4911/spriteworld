@@ -25,15 +25,15 @@ from spriteworld.configs.cobra import common
 import numpy as np
 
 TERMINATE_DISTANCE = 0.075
-NUM_TARGETS = 1
+def NUM_TARGETS(): return np.random.choice([2,3])
 MODES_SHAPES = {
-    'train': distribs.Discrete('shape', ['square', 'circle', 'triangle'], probs=[0.6, 0.15, 0.25]),
+    'train': distribs.Discrete('shape', ['square', 'circle', 'triangle'], probs=[0.55, 0.25, 0.2]),
     'test': distribs.Discrete('shape', ['triangle', 'circle']),
 }
-#MOTION_STD_DEV = np.array([0,0,0.025, 0.025])
-#PROPORTIONAL_MOTION_NOISE = 0.35
-MOTION_STD_DEV = 0.
-PROPORTIONAL_MOTION_NOISE = None
+MOTION_STD_DEV = np.array([0,0,0.05, 0.05])
+PROPORTIONAL_MOTION_NOISE = 0.0
+#MOTION_STD_DEV = 0.
+#PROPORTIONAL_MOTION_NOISE = None
 
 
 def get_config(mode='train'):
@@ -50,9 +50,9 @@ def get_config(mode='train'):
   factors = distribs.Product([
       MODES_SHAPES[mode],
       distribs.Continuous('x', 0.1, 0.9),
-      distribs.Continuous('y', 0.2, 0.5),
-      distribs.Discrete('scale', [0.13, 0.18], probs=[0.7,0.3]),
-      distribs.Discrete('c0', [0.9, 0.55, 0.27], probs=[0.6,0.3,0.1]),
+      distribs.Continuous('y', 0.1, 0.9),
+      distribs.Discrete('scale', [0.20]),
+      distribs.Discrete('c0', [0.9, 0.55, 0.27], probs=[0.4,0.25,0.35]),
       distribs.Discrete('c1', [0.6]),
       distribs.Continuous('c2', 0.9, 1.),
   ])
@@ -61,15 +61,15 @@ def get_config(mode='train'):
   # Randomize sprite ordering to eliminate any task information from occlusions
   sprite_gen = sprite_generators.shuffle(sprite_gen)
 
-  task = tasks.FindGoalPosition(terminate_distance=TERMINATE_DISTANCE, sparse_reward=True)
-  #task = tasks.NoReward()
+  #task = tasks.FindGoalPosition(terminate_distance=TERMINATE_DISTANCE, sparse_reward=True)
+  task = tasks.NoReward()
 
   config = {
       'task': task,
       'action_space': common.noisy_action_space(MOTION_STD_DEV, PROPORTIONAL_MOTION_NOISE, None),
       'renderers': common.renderers(),
       'init_sprites': sprite_gen,
-      'max_episode_length': 5,
+      'max_episode_length': 10,
       'metadata': {
           'name': os.path.basename(__file__),
           'mode': mode
